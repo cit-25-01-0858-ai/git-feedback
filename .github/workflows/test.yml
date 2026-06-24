@@ -1,3 +1,6 @@
+# CI/CD Step 1: Run Tests
+# Triggers on push or PR targeting dev, testing, or release branches.
+# Runs unit tests with the repo encryption key secret.
 name: Run Tests
 
 on:

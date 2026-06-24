@@ -1,3 +1,6 @@
+# CI/CD Step 2: Build Application
+# Triggers sequentially after "Run Tests" finishes successfully on testing or release branches.
+# Runs the Next.js production build.
 name: Build Application
 
 on:

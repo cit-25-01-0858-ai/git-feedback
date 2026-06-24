@@ -1,3 +1,6 @@
+# CI/CD Step 3: Create Release PR
+# Triggers sequentially after "Build Application" finishes successfully on the testing branch.
+# Creates/opens a Pull Request from testing to release branch.
 name: Create Release PR
 
 on:
