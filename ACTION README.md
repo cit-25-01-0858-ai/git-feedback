@@ -30,7 +30,8 @@ on:
     branches: [ testing ]
 ```
 
-> 💡 **Why this matters:** Scoping `on.push.branches` keeps the workflow from firing on every branch — useful when `testing` is your integration branch before merging into `release`.
+> [!TIP]
+> **Why this matters:** Scoping `on.push.branches` keeps the workflow from firing on every branch — useful when `testing` is your integration branch before merging into `release`.
 
 ---
 
@@ -60,7 +61,8 @@ jobs:
 ```
 
 
-> 🐞 **About `::debug::`:** This is a [workflow command](https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions). Debug messages are hidden by default and only appear in logs when you enable **debug logging** (set the `ACTIONS_STEP_DEBUG` secret to `true`).
+> [!NOTE]
+> **About `::debug::`:** This is a [workflow command](https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions). Debug messages are hidden by default and only appear in logs when you enable **debug logging** (set the `ACTIONS_STEP_DEBUG` secret to `true`).
 
 ---
 
@@ -96,7 +98,8 @@ jobs:
 | **`actions/checkout@v4`** | Clones your repository's code onto the runner. Without this step, the runner is an empty Ubuntu VM with no access to your source code — every workflow that touches your code needs it first. |
 | **`actions/setup-node@v6`** | Installs a specific Node.js version on the runner and configures the `npm`/`yarn`/`pnpm` cache. It also adds Node to the `PATH` so subsequent steps can run `npm`, `node`, etc. |
 
-> 💡 **`npm ci` vs `npm install`:** Use `npm ci` in CI pipelines. It installs exact versions from `package-lock.json`, deletes `node_modules` first for a clean slate, and fails if the lockfile is out of sync — making builds reproducible and catching dependency drift early.
+> [!TIP]
+> **`npm ci` vs `npm install`:** Use `npm ci` in CI pipelines. It installs exact versions from `package-lock.json`, deletes `node_modules` first for a clean slate, and fails if the lockfile is out of sync — making builds reproducible and catching dependency drift early.
 
 ---
 
@@ -110,9 +113,11 @@ jobs:
           cache: 'npm'
 ```
 
-> 💡 **Why pin the version?** Letting Node default to "whatever's latest" means your build can silently break when a new major version ships. Pinning `node-version: '22'` keeps local, CI, and production environments consistent.
+> [!IMPORTANT]
+> **Why pin the version?** Letting Node default to "whatever's latest" means your build can silently break when a new major version ships. Pinning `node-version: '22'` keeps local, CI, and production environments consistent.
 >
-> 💡 **The `cache: 'npm'` option** automatically caches `~/.npm` based on your lockfile hash — no need to manually configure `actions/cache` for dependencies.
+> [!TIP]
+> **The `cache: 'npm'` option** automatically caches `~/.npm` based on your lockfile hash — no need to manually configure `actions/cache` for dependencies.
 
 ---
 
@@ -131,7 +136,8 @@ Speeds up rebuilds by reusing `.next/cache` between runs, keyed on dependencies 
             ${{ runner.os }}-nextjs-
 ```
 
-> 💡 **How cache keys work:** GitHub looks for an *exact* match on `key` first. If none exists, it falls back through `restore-keys` in order, using the most recent partial match — so even if your source files changed, you still get a "warm" cache based on matching dependencies.
+> [!NOTE]
+> **How cache keys work:** GitHub looks for an *exact* match on `key` first. If none exists, it falls back through `restore-keys` in order, using the most recent partial match — so even if your source files changed, you still get a "warm" cache based on matching dependencies.
 
 ---
 
@@ -149,7 +155,8 @@ Artifacts let one job hand off files to another job (or let a human download the
           retention-days: 1
 ```
 
-> 💡 **`retention-days: 1`** keeps storage costs down — set this low for short-lived CI artifacts, and higher only for build outputs you actually want to keep around (e.g. release binaries).
+> [!TIP]
+> **`retention-days: 1`** keeps storage costs down — set this low for short-lived CI artifacts, and higher only for build outputs you actually want to keep around (e.g. release binaries).
 
 ---
 
@@ -213,7 +220,8 @@ Test jobs run **in parallel** with each other, but both depend on the `build` jo
           ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
 ```
 
-> ⚠️ **Why `needs: build` is essential:** Without it, GitHub Actions runs all jobs in parallel by default. Both test jobs would start *before* the `build` job finishes, then fail at `download-artifact` because the `next-build` artifact wouldn't exist yet. `needs` enforces the correct execution order: **build → (unit-test ‖ integration-test)**.
+> [!WARNING]
+> **Why `needs: build` is essential:** Without it, GitHub Actions runs all jobs in parallel by default. Both test jobs would start *before* the `build` job finishes, then fail at `download-artifact` because the `next-build` artifact wouldn't exist yet. `needs` enforces the correct execution order: **build → (unit-test ‖ integration-test)**.
 
 ---
 
@@ -269,9 +277,11 @@ Once both test jobs pass, automatically open (or refresh) a PR from `testing` in
             });
 ```
 
-> 💡 **`actions/github-script@v7`** gives you an authenticated, pre-configured Octokit client (`github`) inside the `script:` block, so you can call the GitHub REST API directly in JavaScript without manually handling auth tokens.
+> [!NOTE]
+> **`actions/github-script@v7`** gives you an authenticated, pre-configured Octokit client (`github`) inside the `script:` block, so you can call the GitHub REST API directly in JavaScript without manually handling auth tokens.
 >
-> ⚠️ **Logic note:** This closes the existing PR and opens a brand-new one each run, which loses PR comments/review history and reassigns a new PR number. If you just want to *refresh* the same PR, consider using `pulls.update()` on the existing PR's body/title instead of closing + recreating.
+> [!WARNING]
+> **Logic note:** This closes the existing PR and opens a brand-new one each run, which loses PR comments/review history and reassigns a new PR number. If you just want to *refresh* the same PR, consider using `pulls.update()` on the existing PR's body/title instead of closing + recreating.
 
 ---
 
@@ -372,9 +382,11 @@ Capture each test job's `$GITHUB_STEP_SUMMARY` output and pass it through job ou
             });
 ```
 
-> 💡 **The `EOF` heredoc trick** (`echo "summary<<EOF" ... echo "EOF"`) is required because `GITHUB_OUTPUT` values are normally single-line. This delimiter syntax lets you write **multi-line** content (like a full test report) into a single output variable safely.
+> [!TIP]
+> **The `EOF` heredoc trick** (`echo "summary<<EOF" ... echo "EOF"`) is required because `GITHUB_OUTPUT` values are normally single-line. This delimiter syntax lets you write **multi-line** content (like a full test report) into a single output variable safely.
 >
-> ⚠️ **Watch out for the `EOF` delimiter colliding with content.** If your test summary ever contains the literal string `EOF` on its own line, this will break the output parsing. For production pipelines, use a random delimiter instead, e.g. `echo "summary<<ghadelim_$(uuidgen)"`.
+> [!CAUTION]
+> **Watch out for the `EOF` delimiter colliding with content.** If your test summary ever contains the literal string `EOF` on its own line, this will break the output parsing. For production pipelines, use a random delimiter instead, e.g. `echo "summary<<ghadelim_$(uuidgen)"`.
 
 ---
 
@@ -394,4 +406,5 @@ push to `testing` branch
    [create-pr] → opens/refreshes PR: testing → release
 ```
 
-> 🔑 **Key architectural takeaway:** `needs:` is what turns a flat list of jobs into a real pipeline. Jobs without `needs` run in parallel by default — explicit dependencies are what guarantee build artifacts exist before tests run, and that tests pass before a PR is created.
+> [!IMPORTANT]
+> **Key architectural takeaway:** `needs:` is what turns a flat list of jobs into a real pipeline. Jobs without `needs` run in parallel by default — explicit dependencies are what guarantee build artifacts exist before tests run, and that tests pass before a PR is created.
