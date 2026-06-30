@@ -37,6 +37,9 @@ jobs:
         env: 
           ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
       
+      - name: Wait 30 seconds
+        run: sleep 30
+      
       - name: Upload build artifacts
         uses: actions/upload-artifact@v6
         with:
